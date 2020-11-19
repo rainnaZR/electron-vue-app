@@ -1,6 +1,8 @@
 <template>
   <div id="app">
     <Header />
+    <!-- 不规则窗口 -->
+    <CircleElement />
     <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="123123Welcome to Your Vue.js App"/>
   </div>
@@ -8,12 +10,14 @@
 
 <script>
 import Header from './components/Header';
+import CircleElement from './components/CircleElement';
 import HelloWorld from './components/HelloWorld.vue'
 
 export default {
   name: 'App',
   components: {
     Header,
+    CircleElement,
     HelloWorld
   }
 }
