@@ -5,6 +5,10 @@
         <button @click="onWindowRestore">恢复窗口</button>
         <button @click="onWindowClose">关闭窗口</button>
         <button @click="onModalWindowOpen">打开模态窗口</button>
+        <button @click="onGetWebContents">打印页面对象</button>
+        <button @click="onSetZoom(2)">页面缩放比例设置为2</button>
+        <button @click="onSetZoom(0)">页面还原</button>
+        <button @click="onCreateBrowserView">创建BrowserView</button>
     </div>
 </template>
 
@@ -33,6 +37,31 @@ export default {
                     nodeIntegration: true
                 }
             })
+        },
+        onGetWebContents(){
+            let webContent = remote.getCurrentWebContents();
+            console.log(webContent);
+        },
+        onSetZoom(value){
+            let webContent = remote.getCurrentWebContents();
+            webContent.setZoomLevel(value);
+        },
+        onCreateBrowserView(){
+            let view = new remote.BrowserWindow({
+                webPerferences: {
+                    nodeIntegration: true
+                }
+            });
+            let win = remote.getCurrentWindow();
+            win.setBrowserView(view);
+            let size = win.getSize();
+            view.setBounds({
+                x: 80,
+                y: 80,
+                width: size[0],
+                height: size[1]
+            });
+            view.webContents.loadURL('http://www.baidu.com');
         }
     }
 }

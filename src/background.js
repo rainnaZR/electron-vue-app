@@ -11,6 +11,7 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 async function createWindow() {
+  let preload = require('path').join(__static, 'main.js');
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
@@ -21,7 +22,9 @@ async function createWindow() {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: true || process.env.ELECTRON_NODE_INTEGRATION,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      nodeIntegrationInSubFrames: true,
+      preload
     }
   })
 
