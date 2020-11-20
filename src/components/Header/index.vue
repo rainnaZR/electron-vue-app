@@ -9,6 +9,11 @@
         <button @click="onSetZoom(2)">页面缩放比例设置为2</button>
         <button @click="onSetZoom(0)">页面还原</button>
         <button @click="onCreateBrowserView">创建BrowserView</button>
+        <button @click="onInsertCss">插入样式</button>
+        <button @click="onRemoveCss">移除样式</button>
+        <button @click="onGetUserDataPath">获取用户个性化数据存储目录</button>
+        <button @click="onWriteFile">写文件</button>
+        <button @click="onReadFile">读文件</button>
     </div>
 </template>
 
@@ -16,6 +21,15 @@
 const { remote } = window.require('electron');
 
 export default {
+    data(){
+        return{
+            cssKey: '',
+            dataJson: {
+                name: 'test',
+                age: 10
+            }
+        }
+    },
     methods: {
         onWindowMax(){
             remote.getCurrentWindow().maximize();
@@ -62,6 +76,40 @@ export default {
                 height: size[1]
             });
             view.webContents.loadURL('http://www.baidu.com');
+        },
+        async onInsertCss(){
+            let webContent = remote.getCurrentWebContents();
+            this.cssKey = await webContent.insertCSS('body,html{background:red!important}');
+        },
+        async onRemoveCss(){
+            let webContent = remote.getCurrentWebContents();
+            await webContent.removeInsertedCSS(this.cssKey);
+        },
+        onGetUserDataPath(){
+            let path = remote.app.getPath('userData');
+            alert(path);
+        },
+        onWriteFile(){
+            let fs = window.require('fs-extra');
+            let path = require('path');
+            let dataPath = remote.app.getPath('userData');
+            dataPath = path.join(dataPath, 'test.data.json');
+            console.log('文件写入地址', dataPath);
+
+            fs.writeFileSync(dataPath, JSON.stringify(this.dataJson), {
+                encoding: 'utf8'
+            })
+        },
+        onReadFile(){
+            let fs = window.require('fs-extra');
+            let path = require('path');
+            let dataPath = remote.app.getPath('userData');
+            dataPath = path.join(dataPath, 'test.data.json');
+
+            let content = fs.readFileSync(dataPath, {
+                encoding: 'utf8'
+            })
+            console.log('文件内容读取', content);
         }
     }
 }
