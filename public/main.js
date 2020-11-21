@@ -1,3 +1,3 @@
 window.onload = () => {
-    alert('window.onload')
+    // alert('window.onload')
 }

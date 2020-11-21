@@ -14,10 +14,16 @@
         <button @click="onGetUserDataPath">获取用户个性化数据存储目录</button>
         <button @click="onWriteFile">写文件</button>
         <button @click="onReadFile">读文件</button>
+        <button @click="onDatabaseModify('add')">数据库增加数据</button>
+        <button @click="onDatabaseModify('query')">数据库查询数据</button>
+        <button @click="onDatabaseModify('modify')">数据库修改数据</button>
+        <button @click="onDatabaseModify('delete')">数据库删除数据</button>
+        <button @click="onOpenFile">打开文件</button>
     </div>
 </template>
 
 <script>
+import Dexie from 'dexie';
 const { remote } = window.require('electron');
 
 export default {
@@ -27,8 +33,12 @@ export default {
             dataJson: {
                 name: 'test',
                 age: 10
-            }
+            },
+            db: ''
         }
+    },
+    mounted(){
+        this.onCreateDatabase();
     },
     methods: {
         onWindowMax(){
@@ -94,11 +104,11 @@ export default {
             let path = require('path');
             let dataPath = remote.app.getPath('userData');
             dataPath = path.join(dataPath, 'test.data.json');
-            console.log('文件写入地址', dataPath);
 
             fs.writeFileSync(dataPath, JSON.stringify(this.dataJson), {
                 encoding: 'utf8'
             })
+            alert(`文件写入成功，地址为${dataPath}`);
         },
         onReadFile(){
             let fs = window.require('fs-extra');
@@ -109,7 +119,47 @@ export default {
             let content = fs.readFileSync(dataPath, {
                 encoding: 'utf8'
             })
-            console.log('文件内容读取', content);
+            alert(`文件读取成功，内容为${content}`);
+        },
+        onCreateDatabase(){
+            this.db = new Dexie('testDatabase');
+            this.db.version(1).stores({
+                friends: '++id,name,age'
+            })
+        },
+        async onDatabaseModify(type){
+            switch(type){
+                case 'add':
+                    await this.db.friends.add({
+                        name: 'testA',
+                        age: 20
+                    })
+                    break;
+                case 'query':
+                    await this.db.friends.filter(i => i.id == 1);
+                    break;
+                case 'modify':
+                    await this.db.friends.put({
+                        id: 1,
+                        name: 'modifiedName'
+                    });
+                    break;
+                case 'delete':
+                    await this.db.friends.delete(2);
+                    break;
+            }
+        },
+        async onOpenFile(){
+            let filePath = await remote.dialog.showOpenDialog({
+                title: '我要选择一个文件',
+                buttonLabel: '选择按钮',
+                defaultPath: remote.app.getPath('downloads'),
+                files: [{
+                    name: '图片',
+                    extensions: ['jpg', 'png']
+                }]
+            });
+            console.log('onOpenFile', filePath);
         }
     }
 }
