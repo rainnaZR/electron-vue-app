@@ -19,6 +19,14 @@
         <button @click="onDatabaseModify('modify')">数据库修改数据</button>
         <button @click="onDatabaseModify('delete')">数据库删除数据</button>
         <button @click="onOpenFile">打开文件</button>
+        <button @click="onSettingMenu">自定义设置菜单</button>
+        <button @click="onCopyContent('text', '你好文本')">复制文字</button>
+        <button @click="onReadContent('text')">读取复制的文字</button>
+        <button @click="onCopyContent('html', '<strong>你好HTML</strong>')">复制HTML</button>
+        <button @click="onReadContent('html')">读取复制的HTML</button>
+        <button @click="onCopyContent('img')">复制图片</button>
+        <button @click="onCopyContent('clear')">清除复制的内容</button>
+        <button @click="onSendNotice">发送系统通知</button>
     </div>
 </template>
 
@@ -39,6 +47,7 @@ export default {
     },
     mounted(){
         this.onCreateDatabase();
+        this.onKeyboardClick();
     },
     methods: {
         onWindowMax(){
@@ -160,6 +169,77 @@ export default {
                 }]
             });
             console.log('onOpenFile', filePath);
+        },
+        onSettingMenu(){
+            let Menu = remote.Menu;
+            let templateArr = [{
+                    label: ''
+                },{
+                label: '菜单A',
+                submenu: [{
+                    label: '菜单A-1'
+                },{
+                    label: '菜单A-2',
+                    click(){
+                        alert('菜单A-2点击');
+                    }
+                },{
+                    label: '菜单A-3'
+                }]
+            }];
+            let menu = Menu.buildFromTemplate(templateArr);
+            Menu.setApplicationMenu(menu);
+        },
+        onKeyboardClick(){
+            window.onkeydown = event => {
+                if((event.ctrlKey || event.metaKey) && event.keyCode == 83){
+                    alert('Ctrl+S 按键监听');
+                }
+            }
+        },
+        onCopyContent(type, value){
+            let { clipboard, nativeImage } = window.require('electron');
+            switch(type){
+                case 'text':
+                    clipboard.writeText(value);
+                    break;
+                case 'html':
+                    clipboard.writeHTML(value);
+                    break;
+                case 'img':
+                    {
+                    let imgPath = window.require('path').join(__dirname, 'favicon.ico');
+                    let img = nativeImage.createFromPath(imgPath);
+                    clipboard.writeImage(img);
+                    break;
+                    }
+                case 'clear':
+                    clipboard.clear();
+                    break;
+            }
+            value && alert(`复制成功，复制内容是"${value}"`);
+        },
+        onReadContent(type){
+            let { clipboard } = window.require('electron');
+            switch(type){
+                case 'text':
+                    alert(clipboard.readText());
+                    break;
+                case 'html':
+                    alert(clipboard.readHTML());
+                    break;
+            }
+        },
+        onSendNotice(){
+            let { Notification } = remote;
+            let notification = new Notification({
+                title: '消息的标题',
+                body: '消息的正文，消息的正文，消息的正文，消息的正文，消息的正文，消息的正文'
+            })
+            notification.show();
+            notification.on('click', () => {
+                alert('用户点击了消息')
+            })
         }
     }
 }

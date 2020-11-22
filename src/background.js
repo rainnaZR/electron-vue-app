@@ -18,6 +18,7 @@ async function createWindow() {
     height: 600,
     transparent: false,
     frame: true,
+    autoHideMenuBar: true, // 是否隐藏窗口的系统菜单
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
