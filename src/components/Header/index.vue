@@ -27,6 +27,10 @@
         <button @click="onCopyContent('img')">复制图片</button>
         <button @click="onCopyContent('clear')">清除复制的内容</button>
         <button @click="onSendNotice">发送系统通知</button>
+        <button @click="onGetRequest('http', 'http://192.168.31.8:9084/api/business/linctex/video/view/21?id=21')">与web服务通信(http)</button>
+        <button @click="onGetRequest('https', 'https://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">与web服务通信(https)</button>
+        <button @click="onGetWebRequest('https://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">接口调用</button>
+        <button @click="onGetSocketRequest('ws://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">使用websocket调用服务</button>
     </div>
 </template>
 
@@ -240,6 +244,37 @@ export default {
             notification.on('click', () => {
                 alert('用户点击了消息')
             })
+        },
+        onGetRequest(type, url){
+            let https = type == 'http' ? require('http') : require('https');
+            https.get(url, res => {
+                let html = '';
+                res.on('data', data => (html += data));
+                res.on('end', () => {
+                    alert(`接口响应内容为：${html}`)
+                })
+            })
+        },
+        async onGetWebRequest(url){
+            let res = await fetch(url);
+            let json = await res.json();
+            alert(`接口响应内容为：${JSON.stringify(json)}`)
+        },
+        onGetSocketRequest(url){
+            let websocket = new WebSocket(url);
+            websocket.onopen = evt => {
+                alert('open');
+            }
+            websocket.onclose = evt => {
+                alert('close')
+            }
+            websocket.onmessage = evt => {
+                alert(evt.data);
+            }
+            // 向服务端发送数据
+            websocket.sent('我要发送数据');
+            // 关闭链接
+            websocket.close();
         }
     }
 }

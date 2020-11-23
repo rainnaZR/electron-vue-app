@@ -25,7 +25,9 @@ async function createWindow() {
       nodeIntegration: true || process.env.ELECTRON_NODE_INTEGRATION,
       enableRemoteModule: true,
       nodeIntegrationInSubFrames: true,
-      preload
+      preload,
+      webSecurity: false,  // 此参数禁用当前窗口的同源策略
+      allowRunningInsecureContent: true  // 此参数控制在https页面内可以访问http协议的接口内容
     }
   })
 
