@@ -31,6 +31,12 @@
         <button @click="onGetRequest('https', 'https://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">与web服务通信(https)</button>
         <button @click="onGetWebRequest('https://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">接口调用</button>
         <button @click="onGetSocketRequest('ws://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">使用websocket调用服务</button>
+        <button @click="onGetCapture">录屏</button>
+        <button @click="onViewBattery">查看电源信息</button>
+        <button @click="onPrint">打印</button>
+        <button @click="onSavePdf">保存为PDF</button>
+
+        <video style="position:fixed;bottom:0;left:0;background:#000;" width="400" height="300"></video>
     </div>
 </template>
 
@@ -263,10 +269,10 @@ export default {
         onGetSocketRequest(url){
             let websocket = new WebSocket(url);
             websocket.onopen = evt => {
-                alert('open');
+                alert('open', evt);
             }
             websocket.onclose = evt => {
-                alert('close')
+                alert('close', evt)
             }
             websocket.onmessage = evt => {
                 alert(evt.data);
@@ -275,6 +281,59 @@ export default {
             websocket.sent('我要发送数据');
             // 关闭链接
             websocket.close();
+        },
+        async onGetCapture(){
+            let { desktopCapturer } = window.require('electron');
+            let sources = await desktopCapturer.getSources({
+                types: ['window', 'screen']
+            });
+            let target = sources.find(v => v.name == 'vue-electron');
+            let mediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                    mandatory: {
+                        chromeMediaSource: 'desktop',
+                        chromeMediaSourceId: target.id
+                    }
+                }
+            });
+            var video = document.querySelector('video');
+            video.srcObject = mediaStream;
+            video.onloadedmetadata = () => video.play();
+        },
+        async onViewBattery(){
+            let batteryManager = await navigator.getBattery();
+            let batteryInfo = `是否在充电：${batteryManager.charging}，还剩余电量：${batteryManager.dischargingTime}，当前充电水平：${batteryManager.level}`;
+            alert(batteryInfo);
+        },
+        onPrint(){
+            let webContents = remote.getCurrentWebContents();
+            let printers = webContents.getPrinters(); // 获取所有的打印机
+            let printer = printers.filter(i => i.name == 'myprint')[0];  // 选择需要打印的打印机
+            webContents.print({
+                slient: false,
+                printBackground: true,
+                deviceName: printer?.name
+            }, (success, errorType) => {
+                !success && alert(errorType);
+            })
+        },
+        async onSavePdf(){
+            let fs = window.require('fs');
+            let webContents = remote.getCurrentWebContents();
+            let data = await webContents.printToPDF({});
+            let pathObj = await remote.dialog.showSaveDialog({
+                title: '当前页面保存为pdf文件',
+                filters: [{
+                    name: 'pdf',
+                    extensions: ['pdf']
+                }]
+            });
+            if(pathObj.canceled) return; // 如果用户取消，则文件不保存
+            fs.writeFile(pathObj.filePath, data, error => {
+                error && console.log(error);
+                alert('保存成功');
+            });
         }
     }
 }
