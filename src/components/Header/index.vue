@@ -27,10 +27,10 @@
         <button @click="onCopyContent('img')">复制图片</button>
         <button @click="onCopyContent('clear')">清除复制的内容</button>
         <button @click="onSendNotice">发送系统通知</button>
-        <button @click="onGetRequest('http', 'http://192.168.31.8:9084/api/business/linctex/video/view/21?id=21')">与web服务通信(http)</button>
-        <button @click="onGetRequest('https', 'https://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">与web服务通信(https)</button>
-        <button @click="onGetWebRequest('https://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">接口调用</button>
-        <button @click="onGetSocketRequest('ws://www.sukuan3d.com/api_v2/business/linctex/video/view/26?id=26')">使用websocket调用服务</button>
+        <button @click="onGetRequest('http', 'http://xxxx')">与web服务通信(http)</button>
+        <button @click="onGetRequest('https', 'http://xxxx')">与web服务通信(https)</button>
+        <button @click="onGetWebRequest('http://xxxx')">接口调用</button>
+        <button @click="onGetSocketRequest('ws://xxx')">使用websocket调用服务</button>
         <button @click="onGetCapture">录屏</button>
         <button @click="onViewBattery">查看电源信息</button>
         <button @click="onPrint">打印</button>
